@@ -4,5 +4,9 @@ public class Main {
     public static void main(String[] args) {
       TelegramParser parser = new TelegramParser();
       parser.parseAll();
+
+        Classifier classifier = new Classifier();
+        classifier.classifyAll();
+
         }
     }
