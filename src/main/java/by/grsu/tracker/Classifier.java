@@ -19,6 +19,7 @@ public class Classifier {
         String text;
         String link;
         String category;
+        String students;
     }
 
     private Map<String, String[]> getKeyWords() {
@@ -60,6 +61,8 @@ public class Classifier {
                 event.text = post.text;
                 event.link = post.link;
                 event.category = classify(post.text);
+                StudentMatcher matcher = new StudentMatcher();
+                event.students = matcher.findStudents(post.text);
                 events.add(event);
             }
             saveEvents(events);

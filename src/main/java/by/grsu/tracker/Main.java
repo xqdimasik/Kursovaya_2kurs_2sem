@@ -8,5 +8,8 @@ public class Main {
         Classifier classifier = new Classifier();
         classifier.classifyAll();
 
+
+
+
         }
     }
