@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>ФаМИ Tracker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+    <h1>📊 ФаМИ ГрГУ — Activity Tracker</h1>
+
+    <div class="controls">
+        <button id="btnParse" onclick="parse()">🔄 Парсить каналы</button>
+        <button id="btnEvents" onclick="loadEvents()">📋 Показать события</button>
+        <div class="report-block">
+            <input type="text" id="period" placeholder="май-2026" value="май-2026">
+            <button onclick="generateReport()">📄 Сгенерировать отчёт</button>
+        </div>
+    </div>
+
+    <div id="status"></div>
+    <div id="events"></div>
+</div>
+<script src="app.js"></script>
+</body>
