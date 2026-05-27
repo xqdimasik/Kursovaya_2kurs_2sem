@@ -75,7 +75,6 @@ public class WebServer {
         System.out.println("Сервер запущен: http://localhost:8080");
     }
 
-    // Читаем из resources через classloader
     private void serveFile(HttpExchange exchange, String resource, String contentType) throws IOException {
         // Берём абсолютный путь от корня проекта
         String projectRoot = System.getProperty("user.dir");

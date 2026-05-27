@@ -25,10 +25,8 @@ public class ReportGenerator {
             String filename = "reports/report_" + period + ".txt";
             try (PrintWriter writer = new PrintWriter(new FileWriter(filename))) {
 
-                writer.println("========================================");
                 writer.println("  ОТЧЁТ ФаМИ ГрГУ — период: " + period);
                 writer.println("  Сгенерирован: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")));
-                writer.println("========================================");
                 writer.println();
 
                 for (Map.Entry<String, List<Classifier.Event>> entry : grouped.entrySet()) {
