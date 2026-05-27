@@ -8,6 +8,8 @@ public class Main {
         Classifier classifier = new Classifier();
         classifier.classifyAll();
 
+        ReportGenerator generator = new ReportGenerator();
+        generator.generate("май-2026");
 
 
 
