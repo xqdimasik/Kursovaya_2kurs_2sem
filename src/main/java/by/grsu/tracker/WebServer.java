@@ -70,18 +70,51 @@ public class WebServer {
             }
         });
 
+        server.createContext("/api/categories", exchange -> {
+            try {
+                if ("GET".equals(exchange.getRequestMethod())) {
+                    byte[] data = Files.readAllBytes(Paths.get("data/categories.json"));
+                    exchange.getResponseHeaders().set("Content-Type", "application/json; charset=UTF-8");
+                    exchange.sendResponseHeaders(200, data.length);
+                    try (OutputStream os = exchange.getResponseBody()) { os.write(data); }
+
+                } else if ("POST".equals(exchange.getRequestMethod())) {
+                    String body = new String(exchange.getRequestBody().readAllBytes(), "UTF-8");
+                    Files.write(Paths.get("data/categories.json"), body.getBytes("UTF-8"));
+                    sendJson(exchange, "{\"status\":\"ok\",\"message\":\"Категории сохранены\"}");
+                }
+            } catch (Exception e) {
+                sendJson(exchange, "{\"status\":\"error\",\"message\":\"" + e.getMessage() + "\"}");
+            }
+        });
+
+        server.createContext("/api/channels", exchange -> {
+            try {
+                if ("GET".equals(exchange.getRequestMethod())) {
+                    byte[] data = Files.readAllBytes(Paths.get("data/channels.json"));
+                    exchange.getResponseHeaders().set("Content-Type", "application/json; charset=UTF-8");
+                    exchange.sendResponseHeaders(200, data.length);
+                    try (OutputStream os = exchange.getResponseBody()) { os.write(data); }
+
+                } else if ("POST".equals(exchange.getRequestMethod())) {
+                    String body = new String(exchange.getRequestBody().readAllBytes(), "UTF-8");
+                    Files.write(Paths.get("data/channels.json"), body.getBytes("UTF-8"));
+                    sendJson(exchange, "{\"status\":\"ok\",\"message\":\"Каналы сохранены\"}");
+                }
+            } catch (Exception e) {
+                sendJson(exchange, "{\"status\":\"error\",\"message\":\"" + e.getMessage() + "\"}");
+            }
+        });
+
         server.setExecutor(null);
         server.start();
         System.out.println("Сервер запущен: http://localhost:8080");
     }
 
     private void serveFile(HttpExchange exchange, String resource, String contentType) throws IOException {
-        // Берём абсолютный путь от корня проекта
         String projectRoot = System.getProperty("user.dir");
         File file = new File(projectRoot + File.separator + "src" + File.separator + "main"
                 + File.separator + "resources" + File.separator + resource.replace("/", File.separator));
-
-        System.out.println("Ищу файл: " + file.getAbsolutePath() + " | exists: " + file.exists());
 
         if (!file.exists()) {
             String msg = "404: " + file.getAbsolutePath();

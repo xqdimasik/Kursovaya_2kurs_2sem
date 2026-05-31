@@ -9,17 +9,44 @@
 <div class="container">
     <h1>📊 ФаМИ ГрГУ — Activity Tracker</h1>
 
+    <div class="card">
+        <div class="card-title">📡 Выбор каналов для парсинга</div>
+        <div id="channelsList" class="channels-list"></div>
+        <div class="channel-add">
+            <input type="text" id="newChannel" placeholder="Добавить канал (например: grsu_news)">
+            <button onclick="addChannel()" class="btn btn-secondary">➕ Добавить</button>
+        </div>
+    </div>
+
     <div class="controls">
-        <button id="btnParse" onclick="parse()">🔄 Парсить каналы</button>
-        <button id="btnEvents" onclick="loadEvents()">📋 Показать события</button>
+        <button onclick="parse()" class="btn btn-primary">🔄 Парсить выбранные</button>
+        <button onclick="loadEvents()" class="btn btn-primary">📋 Показать события</button>
+        <button onclick="showCategories()" class="btn btn-secondary">⚙️ Категории</button>
         <div class="report-block">
-            <input type="text" id="period" placeholder="май-2026" value="май-2026">
-            <button onclick="generateReport()">📄 Сгенерировать отчёт</button>
+            <input type="text" id="period" placeholder="Введите период (май-2026)">
+            <button onclick="generateReport()" class="btn btn-secondary">📄 Отчёт</button>
         </div>
     </div>
 
     <div id="status"></div>
+
+    <div id="categoriesPanel" style="display:none;" class="card">
+        <div class="card-title">⚙️ Управление категориями</div>
+        <p class="hint">Паттерн — регулярное выражение, слова через <code>|</code>. Например: <code>футбол|волейбол|турнир</code></p>
+        <table id="categoriesTable">
+            <thead>
+            <tr><th>Название категории</th><th>Паттерн (regex)</th><th></th></tr>
+            </thead>
+            <tbody id="categoriesBody"></tbody>
+        </table>
+        <div class="panel-actions">
+            <button onclick="addCategory()" class="btn btn-secondary">➕ Добавить</button>
+            <button onclick="saveCategories()" class="btn btn-save">💾 Сохранить</button>
+        </div>
+    </div>
+
     <div id="events"></div>
 </div>
 <script src="app.js"></script>
 </body>
+</html>

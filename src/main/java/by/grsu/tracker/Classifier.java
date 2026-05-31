@@ -2,17 +2,17 @@ package by.grsu.tracker;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import java.lang.reflect.Type;
 import com.google.gson.reflect.TypeToken;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.regex.Pattern;
 
 public class Classifier {
+
     public static class Event {
         String channel;
         String date;
@@ -22,36 +22,34 @@ public class Classifier {
         String students;
     }
 
-    private Map<String, String[]> getKeyWords() {
-        Map<String, String[]> keywords = new HashMap<>();
+    public static class Category {
+        public String name;
+        public String pattern;
+    }
 
-        keywords.put("НИРС", new String[]{"конференция", "статья", "грант", "олимпиада", "хакатон", "исследование","иннастарт", "иннофест", "100 идей", "научный", "лаборатория", "разработка"});
-        keywords.put("Спорт", new String[]{"соревнование", "турнир", "матч", "первенство", "кросс", "футбол","баскетбол", "волейбол", "спартакиада", "дартс", "бег", "метание", "тренировка", "чемпионат" });
-        keywords.put("Общественная деятельность", new String[]{ "волонтер", "волонтерство", "концерт", "фестиваль", "субботник", "экскурсия", "акция", "благотворительность", "митинг" });
-        keywords.put("Идеологическое воспитание", new String[]{ "урок мужества", "день победы", "возложение цветов", "митинг", "ветеран",   "память", "герой", "воинская слава", "знамя", "гимн", "день независимости","день народного единства", "9 мая", "23 февраля", "государственные символы", "флаг", "герб", "патриотизм", "гражданственность"});
-        keywords.put("Духовно-нравственное воспитание", new String[]{"духовность", "нравственность", "мораль", "этика", "доброта", "милосердие",  "сострадание", "честь", "достоинство"  });
-        keywords.put("Эстетическое воспитание", new String[]{"искусство", "живопись", "музыка", "театр", "красота", "дизайн",  "выставка", "творчество", "эстетика" });
-        keywords.put("Воспитание психологической культуры", new String[]{"психолог", "психология", "стресс", "тревога", "поддержка", "буллинг","конфликт", "тренинг", "психическое здоровье" });
-        keywords.put("Формирование здорового образа жизни", new String[]{  "зож", "здоровье", "наркотики", "алкоголь", "курение", "зависимость",   "профилактика", "здоровый образ", "спорт" });
-        keywords.put("Воспитание физической культуры", new String[]{ "физкультура", "зарядка", "разминка", "гто", "нормативы", "физическая активность"  });
-        keywords.put("Семейное и гендерное воспитание", new String[]{"семья", "родители", "дети", "гендер", "равенство", "материнство", "отцовство", "семейные ценности"  });
-        keywords.put("Трудовое и профессиональное воспитание", new String[]{"профориентация", "карьера", "работа", "профессия", "трудоустройство","стажировка", "мастер-класс", "профессиональное", "навыки" });
-        keywords.put("Бережное отношение к окружающей среде", new String[]{"экология", "природа", "мусор", "уборка", "сортировка", "зеленый","эко", "лес", "чистота", "окружающая среда", "переработка"});
-        keywords.put("Культура безопасной жизнедеятельности", new String[]{"безопасность", "чс", "пожар", "эвакуация", "обж", "авария", "правила поведения", "терроризм", "экстремальная ситуация"});
-        keywords.put("Культура быта и досуга", new String[]{ "досуг", "отдых", "хобби", "быт", "уют", "праздник", "развлечение", "вечеринка", "культура быта"});
-        keywords.put("Поликультурное воспитание", new String[]{"толерантность", "культура", "традиции", "национальность","межнациональный", "дружба народов", "диалог культур"});
-        keywords.put("Экономическое воспитание", new String[]{"финансы", "бюджет", "экономика", "деньги", "сбережение", "налоги","бизнес", "финансовая грамотность" });
-        return keywords;
+    private List<Category> loadCategories() {
+        Gson gson = new Gson();
+        try (FileReader reader = new FileReader("data/categories.json")) {
+            Type type = new com.google.gson.reflect.TypeToken<List<Category>>() {}.getType();
+            return gson.fromJson(reader, type);
+        } catch (IOException e) {
+            System.err.println("Ошибка загрузки категорий: " + e.getMessage());
+            return new ArrayList<>();
+        }
     }
 
     private String classify(String text) {
         String lowerText = text.toLowerCase();
-        Map<String, String[]> keywords = getKeyWords();
-        for (Map.Entry<String, String[]> entry : keywords.entrySet()) {
-            for (String word : entry.getValue()) {
-                if (lowerText.contains(word)) {
-                    return entry.getKey();
+        List<Category> categories = loadCategories();
+        for (Category category : categories) {
+            try {
+                Pattern p = Pattern.compile(category.pattern,
+                        Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+                if (p.matcher(lowerText).find()) {
+                    return category.name;
                 }
+            } catch (Exception e) {
+                System.err.println("Неверный паттерн в категории " + category.name);
             }
         }
         return "Прочее";
@@ -60,7 +58,7 @@ public class Classifier {
     public List<Event> classifyAll() {
         Gson gson = new Gson();
         try (FileReader reader = new FileReader("data/posts.json")) {
-            Type type = new TypeToken<List<TelegramParser.Post>>() {}.getType();
+            Type type = new com.google.gson.reflect.TypeToken<List<TelegramParser.Post>>() {}.getType();
             List<TelegramParser.Post> posts = gson.fromJson(reader, type);
             List<Event> events = new ArrayList<>();
             for (TelegramParser.Post post : posts) {
@@ -77,19 +75,17 @@ public class Classifier {
             saveEvents(events);
             return events;
         } catch (IOException e) {
-            System.err.println("Error");
+            System.err.println("Ошибка классификации: " + e.getMessage());
         }
         return new ArrayList<>();
     }
 
-    private void saveEvents (List<Event> events){
+    private void saveEvents(List<Event> events) {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        try(FileWriter writer = new FileWriter("data/events.json")){
+        try (FileWriter writer = new FileWriter("data/events.json")) {
             gson.toJson(events, writer);
-        }catch(IOException e){
-            System.err.println("Error");
+        } catch (IOException e) {
+            System.err.println("Ошибка сохранения событий: " + e.getMessage());
         }
-
     }
-
 }
